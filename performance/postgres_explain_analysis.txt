@@ -1,0 +1,205 @@
+TRIGGER WALLET AUDIT
+"QUERY PLAN"
+"Update on users  (cost=0.34..8.36 rows=0 width=0) (actual time=0.055..0.056 rows=0.00 loops=1)"
+"  Buffers: shared hit=8"
+"  InitPlan 1"
+"    ->  Limit  (cost=0.00..0.05 rows=1 width=16) (actual time=0.011..0.011 rows=1.00 loops=1)"
+"          Buffers: shared hit=2"
+"          ->  Seq Scan on users users_1  (cost=0.00..1083.00 rows=20000 width=16) (actual time=0.010..0.010 rows=1.00 loops=1)"
+"                Buffers: shared hit=2"
+"  ->  Index Scan using users_pkey on users  (cost=0.29..8.31 rows=1 width=22) (actual time=0.026..0.027 rows=1.00 loops=1)"
+"        Index Cond: (id = (InitPlan 1).col1)"
+"        Index Searches: 1"
+"        Buffers: shared hit=5"
+"Planning Time: 0.065 ms"
+"Trigger trg_users_wallet_audit: time=0.125 calls=1"
+"Execution Time: 0.200 ms"
+
+
+WINDOW ANALYSIS
+"QUERY PLAN"
+"Sort  (cost=198229.96..198230.21 rows=100 width=196) (actual time=81.844..81.875 rows=920.00 loops=1)"
+"  Sort Key: (dense_rank() OVER w1), f.order_date"
+"  Sort Method: quicksort  Memory: 109kB"
+"  Buffers: shared hit=1486"
+"  CTE daily_revenue"
+"    ->  HashAggregate  (cost=12745.60..15940.38 rows=110916 width=60) (actual time=49.004..51.357 rows=9199.00 loops=1)"
+"          Group Key: o.restaurant_id, (o.created_at)::date"
+"          Planned Partitions: 8  Batches: 1  Memory Usage: 4113kB"
+"          Buffers: shared hit=1482"
+"          ->  Seq Scan on orders o  (cost=0.00..3261.96 rows=111984 width=25) (actual time=0.014..17.845 rows=111985.00 loops=1)"
+"                Filter: ((status)::text = 'DELIVERED'::text)"
+"                Rows Removed by Filter: 8015"
+"                Buffers: shared hit=1482"
+"  CTE filled"
+"    ->  Merge Left Join  (cost=32294.90..39811.22 rows=277290 width=60) (actual time=62.401..65.832 rows=9200.00 loops=1)"
+"          Merge Cond: ((r_1.id = dr.restaurant_id) AND (((d.order_date)::date) = dr.order_date))"
+"          Buffers: shared hit=1484"
+"          InitPlan 2"
+"            ->  Aggregate  (cost=2495.61..2495.62 rows=1 width=4) (actual time=53.431..53.432 rows=1.00 loops=1)"
+"                  Buffers: shared hit=1482"
+"                  ->  CTE Scan on daily_revenue  (cost=0.00..2218.32 rows=110916 width=4) (actual time=49.006..53.013 rows=9199.00 loops=1)"
+"                        Storage: Memory  Maximum Storage: 703kB"
+"                        Buffers: shared hit=1482"
+"          InitPlan 3"
+"            ->  Aggregate  (cost=2495.61..2495.62 rows=1 width=4) (actual time=0.718..0.718 rows=1.00 loops=1)"
+"                  ->  CTE Scan on daily_revenue daily_revenue_1  (cost=0.00..2218.32 rows=110916 width=4) (actual time=0.001..0.373 rows=9199.00 loops=1)"
+"                        Storage: Memory  Maximum Storage: 703kB"
+"          ->  Sort  (cost=11619.08..11869.08 rows=100000 width=24) (actual time=57.467..57.831 rows=9200.00 loops=1)"
+"                Sort Key: r_1.id, ((d.order_date)::date)"
+"                Sort Method: quicksort  Memory: 816kB"
+"                Buffers: shared hit=1484"
+"                ->  Nested Loop  (cost=0.01..1263.26 rows=100000 width=24) (actual time=54.188..55.285 rows=9200.00 loops=1)"
+"                      Buffers: shared hit=1484"
+"                      ->  Function Scan on generate_series d  (cost=0.01..10.01 rows=1000 width=8) (actual time=54.172..54.176 rows=92.00 loops=1)"
+"                            Buffers: shared hit=1482"
+"                      ->  Materialize  (cost=0.00..3.50 rows=100 width=16) (actual time=0.000..0.003 rows=100.00 loops=92)"
+"                            Storage: Memory  Maximum Storage: 20kB"
+"                            Buffers: shared hit=2"
+"                            ->  Seq Scan on restaurants r_1  (cost=0.00..3.00 rows=100 width=16) (actual time=0.011..0.016 rows=100.00 loops=1)"
+"                                  Buffers: shared hit=2"
+"          ->  Materialize  (cost=15684.59..16239.17 rows=110916 width=60) (actual time=4.929..5.961 rows=9199.00 loops=1)"
+"                Storage: Memory  Maximum Storage: 17kB"
+"                ->  Sort  (cost=15684.59..15961.88 rows=110916 width=60) (actual time=4.928..5.338 rows=9199.00 loops=1)"
+"                      Sort Key: dr.restaurant_id, dr.order_date"
+"                      Sort Method: quicksort  Memory: 888kB"
+"                      ->  CTE Scan on daily_revenue dr  (cost=0.00..2218.32 rows=110916 width=60) (actual time=0.002..0.599 rows=9199.00 loops=1)"
+"                            Storage: Memory  Maximum Storage: 703kB"
+"  ->  Merge Join  (cost=122370.02..142475.04 rows=100 width=196) (actual time=69.712..81.541 rows=920.00 loops=1)"
+"        Merge Cond: (f.restaurant_id = filled.restaurant_id)"
+"        Buffers: shared hit=1486"
+"        ->  WindowAgg  (cost=40092.25..56729.65 rows=277290 width=156) (actual time=68.195..79.543 rows=8281.00 loops=1)"
+"              Window: w2 AS (PARTITION BY f.restaurant_id ORDER BY f.order_date)"
+"              Storage: Memory  Maximum Storage: 17kB"
+"              Buffers: shared hit=1484"
+"              ->  WindowAgg  (cost=40092.25..50490.63 rows=277290 width=116) (actual time=68.189..75.865 rows=8282.00 loops=1)"
+"                    Window: w1 AS (PARTITION BY f.restaurant_id ORDER BY f.order_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)"
+"                    Storage: Memory  Maximum Storage: 17kB"
+"                    Buffers: shared hit=1484"
+"                    ->  WindowAgg  (cost=40092.25..45638.05 rows=277290 width=84) (actual time=68.185..72.812 rows=8283.00 loops=1)"
+"                          Window: w7 AS (PARTITION BY f.restaurant_id ORDER BY f.order_date ROWS BETWEEN '6'::bigint PRECEDING AND CURRENT ROW)"
+"                          Storage: Memory  Maximum Storage: 17kB"
+"                          Buffers: shared hit=1484"
+"                          ->  Sort  (cost=40092.25..40785.48 rows=277290 width=52) (actual time=68.174..68.410 rows=8284.00 loops=1)"
+"                                Sort Key: f.restaurant_id, f.order_date"
+"                                Sort Method: quicksort  Memory: 816kB"
+"                                Buffers: shared hit=1484"
+"                                ->  CTE Scan on filled f  (cost=0.00..5545.80 rows=277290 width=52) (actual time=62.403..67.391 rows=9200.00 loops=1)"
+"                                      Storage: Memory  Maximum Storage: 703kB"
+"                                      Buffers: shared hit=1484"
+"        ->  Sort  (cost=82277.76..82278.01 rows=100 width=96) (actual time=1.514..1.541 rows=829.00 loops=1)"
+"              Sort Key: filled.restaurant_id"
+"              Sort Method: quicksort  Memory: 25kB"
+"              Buffers: shared hit=2"
+"              ->  Hash Join  (cost=73921.09..82274.44 rows=100 width=96) (actual time=1.503..1.511 rows=10.00 loops=1)"
+"                    Hash Cond: (filled.restaurant_id = r.id)"
+"                    Buffers: shared hit=2"
+"                    ->  WindowAgg  (cost=73916.84..78769.39 rows=277290 width=88) (actual time=1.477..1.483 rows=10.00 loops=1)"
+"                          Window: w1 AS (ORDER BY (sum(filled.daily_revenue)) ROWS UNBOUNDED PRECEDING)"
+"                          Run Condition: (dense_rank() OVER w1 <= 10)"
+"                          Storage: Memory  Maximum Storage: 17kB"
+"                          ->  Sort  (cost=73916.82..74610.04 rows=277290 width=48) (actual time=1.474..1.475 rows=11.00 loops=1)"
+"                                Sort Key: (sum(filled.daily_revenue)) DESC"
+"                                Sort Method: quicksort  Memory: 28kB"
+"                                ->  HashAggregate  (cost=31975.00..40315.37 rows=277290 width=48) (actual time=1.405..1.458 rows=100.00 loops=1)"
+"                                      Group Key: filled.restaurant_id"
+"                                      Planned Partitions: 16  Batches: 1  Memory Usage: 569kB"
+"                                      ->  CTE Scan on filled  (cost=0.00..5545.80 rows=277290 width=48) (actual time=0.000..0.370 rows=9200.00 loops=1)"
+"                                            Storage: Memory  Maximum Storage: 703kB"
+"                    ->  Hash  (cost=3.00..3.00 rows=100 width=40) (actual time=0.021..0.022 rows=100.00 loops=1)"
+"                          Buckets: 1024  Batches: 1  Memory Usage: 16kB"
+"                          Buffers: shared hit=2"
+"                          ->  Seq Scan on restaurants r  (cost=0.00..3.00 rows=100 width=40) (actual time=0.007..0.012 rows=100.00 loops=1)"
+"                                Buffers: shared hit=2"
+"Planning:"
+"  Buffers: shared hit=4"
+"Planning Time: 0.653 ms"
+"Execution Time: 82.123 ms"
+
+EXECUTION PLAN ANALYSIS
+=======================
+
+#   Node / Operation                  Actual   Planned   Loops   Ratio       Analysis
+------------------------------------------------------------------------------------------------
+1   Sort                              920      100       1       9.20x       Actual ~9x higher
+2   Aggregate                         9,199    110,916   1       12.06x      Planned ~12x higher
+3   Seq Scan on orders                111,985  111,984   1       1.01x       Excellent estimate
+4   Merge Left Join                   9,384    277,290   1       29.55x      Major estimation error
+5   Aggregate                         1        1         1       1.00x       Accurate estimate
+6   CTE Scan                          9,199    110,916   1       12.06x      Significant error
+7   Aggregate                         1        1         1       1.00x       Accurate estimate
+8   CTE Scan                          9,199    110,916   1       12.06x      Significant error
+9   Sort                              9,384    100,000   1       10.66x      Planner overestimates
+10  Nested Loop Inner Join            9,384    100,000   1       10.66x      Join overestimated
+11  Function Scan                     92       1,000     1       10.87x      Function estimate poor
+12  Materialize                       102      100       92      1.02x       Good estimate
+14  Materialize                       9,199    110,916   1       12.06x      CTE error propagated
+15  Sort                              9,199    110,916   1       12.06x      Significant error
+16  CTE Scan                          9,199    110,916   1       12.06x      Significant error
+17  Merge Inner Join                  920      100       1       9.20x       Actual ~9x higher
+18  Window Aggregate                  8,465    277,290   1       32.76x      Major overestimation
+19  Window Aggregate                  8,466    277,290   1       32.76x      Major overestimation
+20  Window Aggregate                  8,467    277,290   1       32.75x      Major overestimation
+21  Sort                              8,468    277,290   1       32.75x      Major estimation error
+22  CTE Scan                          9,384    277,290   1       29.55x      Major estimation error
+23  Sort                              829      100       1       8.29x       Actual ~8x higher
+24  Hash Inner Join                   10       100       1       10.00x      Planner overestimates
+25  Window Aggregate                  10       277,290   1       27,729x     EXTREME error
+26  Sort                              11       277,290   1       25,208x     EXTREME error
+27  Aggregate                         102      277,290   1       2,718.53x   EXTREME error
+28  CTE Scan                          9,384    277,290   1       29.55x      Major estimation error
+29  Hash                              102      100       1       1.02x       Good estimate
+30  Seq Scan on restaurants           102      100       1       1.02x       Excellent estimate
+------------------------------------------------------------------------------------------------
+
+
+KEY FINDINGS
+============
+
+Category                  Nodes                         Observation
+---------------------------------------------------------------------------
+Excellent estimates       3, 5, 7, 12, 29, 30        Actual ≈ Planned
+Moderate errors            1, 9, 10, 11, 17, 23, 24   ~8–11x difference
+Major errors               2, 4, 6, 8, 14–16, 18–22   ~12–33x difference
+Extreme errors             25, 26, 27                  Up to 27,729x difference
+
+
+MOST IMPORTANT NODES
+====================
+
+Rank   Node                         Planned       Actual       Difference
+---------------------------------------------------------------------------
+1      25 - Window Aggregate       277,290       10           27,729x
+2      26 - Sort                   277,290       11           25,208x
+3      27 - Aggregate              277,290       102          2,718.53x
+4      18-20 - Window Aggregate    277,290       ~8,466       ~32.76x
+5      4 - Merge Left Join         277,290       9,384        29.55x
+
+
+OVERALL CONCLUSION
+==================
+
+The execution plan shows severe cardinality misestimation.
+
+The largest errors occur around:
+
+    CTE
+      |
+      v
+  Aggregate
+      |
+      v
+     Join
+      |
+      v
+    Sort
+      |
+      v
+Window Aggregate
+
+The worst case is Node 25, where PostgreSQL estimates 277,290 rows
+but only 10 rows are actually produced — a 27,729x difference.
+
+These estimation errors propagate through subsequent Sort, Aggregate,
+Join, and Window operations and may cause PostgreSQL to choose
+suboptimal execution strategies.

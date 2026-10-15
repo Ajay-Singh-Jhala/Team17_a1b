@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="#142c26" name="theme-color"/>
+  <title>
+   BiteStream &middot; Operations
+  </title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link href="./styles.css?v=7" rel="stylesheet"/>
+ </head>
+ <body>
+  <div class="app-shell">
+   <aside class="sidebar">
+    <a class="brand" href="#browse">
+     <span class="brand-mark">
+      b
+      <span>
+       &middot;
+      </span>
+     </span>
+     <span>
+      BiteStream
+      <small>
+       DATA CONSOLE
+      </small>
+     </span>
+    </a>
+    <div class="side-label">
+     WORKSPACE
+    </div>
+    <nav id="nav">
+     <button class="nav-item active" data-screen="browse">
+      <span>
+       ▦
+      </span>
+      Browse
+      <kbd>
+       01
+      </kbd>
+     </button>
+     <button class="nav-item" data-screen="checkout">
+      <span>
+       ＋
+      </span>
+      Checkout
+      <kbd>
+       02
+      </kbd>
+     </button>
+     <button class="nav-item" data-screen="audit">
+      <span>
+       &rdsh;
+      </span>
+      Audit trail
+      <kbd>
+       03
+      </kbd>
+     </button>
+     <button class="nav-item" data-screen="analytics">
+      <span>
+       ▥
+      </span>
+      Analytics
+      <kbd>
+       04
+      </kbd>
+     </button>
+     <button class="nav-item" data-screen="map">
+      <span>
+       &target;
+      </span>
+      Driver map
+      <kbd>
+       05
+      </kbd>
+     </button>
+     <button class="nav-item" data-screen="reviews">
+      <span>
+       &star;
+      </span>
+      Reviews &amp; menus
+      <kbd>
+       06
+      </kbd>
+     </button>
+    </nav>
+    <div class="sidebar-bottom">
+     <div class="status-dot">
+     </div>
+     <div>
+      <b>
+       Local environment
+      </b>
+      <small id="healthText">
+       Connecting to databases&hellip;
+      </small>
+     </div>
+    </div>
+   </aside>
+   <main class="main-area">
+    <header class="topbar">
+     <div>
+      <div class="eyebrow">
+       BITESTREAM / OPERATIONS
+      </div>
+      <h1 id="pageTitle">
+       Browse data
+      </h1>
+     </div>
+     <div class="top-actions">
+      <div class="live-pill">
+       <span>
+       </span>
+       LIVE DATA
+      </div>
+      <div class="avatar">
+       BS
+      </div>
+     </div>
+    </header>
+    <div class="alert hidden" id="alert" role="status">
+    </div>
+    <section class="screen active" id="screen-browse">
+     <div class="intro-row">
+      <div>
+       <p class="lede">
+        A live window into your operational data.
+       </p>
+       <p class="muted">
+        Search, inspect records, and move orders through their lifecycle.
+       </p>
+      </div>
+      <div class="mini-stat">
+       <span class="mini-icon">
+        &nearrow;
+       </span>
+       <div>
+        <b id="browseCount">
+         &mdash;
+        </b>
+        <small>
+         records in view
+        </small>
+       </div>
+      </div>
+     </div>
+     <div class="toolbar">
+      <div class="segmented" id="entityTabs">
+       <button class="selected" data-entity="users">
+        Users
+       </button>
+       <button data-entity="restaurants">
+        Restaurants
+       </button>
+       <button data-entity="orders">
+        Orders
+       </button>
+      </div>
+      <div class="search-wrap">
+       <span>
+        &telrec;
+       </span>
+       <input id="browseSearch" placeholder="Search current table&hellip;"/>
+       <button id="searchBtn">
+        Search
+       </button>
+      </div>
+     </div>
+     <div class="panel">
+      <div class="panel-head">
+       <div>
+        <h2 id="tableTitle">
+         Users
+        </h2>
+        <p id="tableSubtitle">
+         Customer wallets and account details
+        </p>
+       </div>
+       <span class="table-meta" id="tableMeta">
+        Loading records&hellip;
+       </span>
+      </div>
+      <div class="table-scroll">
+       <table>
+        <thead id="browseHead">
+        </thead>
+        <tbody id="browseBody">
+         <tr>
+          <td class="loading-cell">
+           Loading records&hellip;
+          </td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+      <div class="pagination">
+       <span id="pageInfo">
+        &mdash;
+       </span>
+       <div>
+        <button class="btn btn-light btn-small" id="prevPage">
+         &larr; Previous
+        </button>
+        <button class="btn btn-light btn-small" id="nextPage">
+         Next &rarr;
+        </button>
+       </div>
+      </div>
+     </div>
+     <div class="panel detail-panel hidden" id="recordDetail">
+      <div class="panel-head">
+       <div>
+        <h2>
+         Record details
+        </h2>
+        <p>
+         Selected record from the live database
+        </p>
+       </div>
+       <button aria-label="Close details" class="icon-button" id="closeDetail">
+        &times;
+       </button>
+      </div>
+      <pre id="detailContent"></pre>
+     </div>
+    </section>
+    <section class="screen" id="screen-checkout">
+     <div class="intro-row">
+      <div>
+       <p class="lede">
+        Place an order through the database procedure.
+       </p>
+       <p class="muted">
+        The stored procedure handles the debit; the trigger writes the audit trail.
+       </p>
+      </div>
+      <span class="workflow-chip">
+       WORKFLOW 1 &middot; TRANSACTION
+      </span>
+     </div>
+     <div class="two-col">
+      <div class="panel form-panel">
+       <div class="panel-head">
+        <div>
+         <h2>
+          New checkout
+         </h2>
+         <p>
+          Choose a customer and restaurant.
+         </p>
+        </div>
+        <span class="step-badge">
+         01
+        </span>
+       </div>
+       <form id="checkoutForm">
+        <label>
+         Search customer by name or ID
+         <input id="checkoutUserSearch" type="search" placeholder="Type a customer name or UUID…" autocomplete="off">
+        </label>
+        <label>
+         Customer
+         <select id="checkoutUser" required="">
+         </select>
+        </label>
+        <p class="form-hint">Search runs across all customers, not just the first 100 results.</p>
+        <div class="balance-preview">
+         <span>
+          Available wallet balance
+         </span>
+         <b id="walletPreview">
+          Choose a customer
+         </b>
+        </div>
+        <label>
+         Restaurant
+         <select id="checkoutRestaurant" required="">
+         </select>
+        </label>
+        <div class="checkout-menu-block">
+         <div class="checkout-menu-heading">
+          <div><h3>Menu &amp; prices</h3><p>Choose items below. The order total updates automatically.</p></div>
+          <span id="menuItemCount">0 items</span>
+         </div>
+         <div id="checkoutMenu" class="checkout-menu" aria-live="polite">
+          <div class="empty-state"><b>Choose a restaurant</b><p>The restaurant menu and prices will appear here.</p></div>
+         </div>
+         <div id="checkoutCart" class="checkout-cart">
+          <div class="cart-empty">Your order is empty. Add an item from the menu.</div>
+         </div>
+        </div>
+        <label>
+         Order total
+         <div class="amount-input">
+          <span>₹</span>
+          <input id="checkoutAmount" min="0.01" placeholder="0.00" readonly required step="0.01" type="number"/>
+         </div>
+        </label>
+        <button class="btn btn-primary full" id="checkoutSubmit" type="submit" disabled>
+         Place order
+         <span>
+          &rarr;
+         </span>
+        </button>
+        <p class="form-hint">
+         The total is calculated from the selected menu items and their listed prices. Checkout is blocked until at least one available item is added.
+        </p>
+       </form>
+      </div>
+      <div class="panel result-panel">
+       <div class="panel-head">
+        <div>
+         <h2>
+          Transaction result
+         </h2>
+         <p>
+          Balance change and trigger evidence
+         </p>
+        </div>
+        <span class="step-badge">
+         02
+        </span>
+       </div>
+       <div class="empty-state" id="checkoutResult">
+        <div class="empty-icon">
+         &nearrow;
+        </div>
+        <b>
+         Ready when you are
+        </b>
+        <p>
+         Submit a checkout to see the procedure result, balance before/after, and newest audit entry.
+        </p>
+       </div>
+      </div>
+     </div>
+     <div class="panel status-guide">
+      <div class="panel-head">
+       <div>
+        <h2>
+         Order status controls
+        </h2>
+        <p>
+         Browse &rarr; Orders to change an order status and release the active-order constraint.
+        </p>
+       </div>
+       <button class="btn btn-light btn-small" data-goto="browse">
+        Open orders &rarr;
+       </button>
+      </div>
+      <div class="status-flow">
+       <span>
+        PREPARING
+       </span>
+       <i>
+        &rarr;
+       </i>
+       <span>
+        DELIVERING
+       </span>
+       <i>
+        &rarr;
+       </i>
+       <span class="done">
+        DELIVERED
+       </span>
+       <small>
+        Only PREPARING / DELIVERING count as active.
+       </small>
+      </div>
+     </div>
+    </section>
+    <section class="screen" id="screen-audit">
+     <div class="intro-row">
+      <div>
+       <p class="lede">
+        Every wallet change leaves a trace.
+       </p>
+       <p class="muted">
+        Read-only audit history with date filtering and running balance context.
+       </p>
+      </div>
+      <span class="workflow-chip">
+       WALLET AUDIT
+      </span>
+     </div>
+     <div class="panel filter-panel">
+      <div class="filter-fields">
+       <label>
+        Search customer by name or ID
+        <input id="auditUserSearch" type="search" placeholder="Search all customers…" autocomplete="off">
+       </label>
+       <button class="btn btn-light" id="auditSearchBtn" type="button">Find customer</button>
+       <label>
+        Customer
+        <select id="auditUser">
+        </select>
+       </label>
+       <label>
+        From date
+        <input id="auditFrom" type="date"/>
+       </label>
+       <label>
+        To date
+        <input id="auditTo" type="date"/>
+       </label>
+       <button class="btn btn-primary" id="auditApply">
+        Apply filters
+       </button>
+      </div>
+     </div>
+     <div class="panel">
+      <div class="panel-head">
+       <div>
+        <h2>
+         Wallet audit log
+        </h2>
+        <p>
+         Append-only records generated by the PostgreSQL trigger.
+        </p>
+       </div>
+       <span class="table-meta" id="auditCount">
+        &mdash;
+       </span>
+      </div>
+      <div class="table-scroll">
+       <table>
+        <thead>
+         <tr>
+          <th>
+           Timestamp
+          </th>
+          <th>
+           Action
+          </th>
+          <th>
+           Amount
+          </th>
+          <th>
+           Balance after
+          </th>
+          <th>
+           Running change
+          </th>
+          <th>
+           Audit ID
+          </th>
+         </tr>
+        </thead>
+        <tbody id="auditBody">
+         <tr>
+          <td class="loading-cell" colspan="6">
+           Choose a customer to load audit history.
+          </td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+     </div>
+    </section>
+    <section class="screen" id="screen-analytics">
+     <div class="intro-row">
+      <div>
+       <p class="lede">
+        Understand performance at a glance.
+       </p>
+       <p class="muted">
+        Seven-day moving average, DENSE_RANK leaderboard, and materialized view summary.
+       </p>
+      </div>
+      <button class="btn btn-primary" id="refreshMv">
+       &orarr; Refresh materialized view
+      </button>
+     </div>
+     <div class="stat-grid">
+      <div class="stat-card">
+       <span class="stat-label">
+        TOTAL REVENUE
+       </span>
+       <b id="mvRevenue">
+        ₹&mdash;
+       </b>
+       <small>
+        Delivered orders &middot; materialized view
+       </small>
+       <div class="stat-symbol">
+        ₹
+       </div>
+      </div>
+      <div class="stat-card">
+       <span class="stat-label">
+        COMPLETED ORDERS
+       </span>
+       <b id="mvOrders">
+        &mdash;
+       </b>
+       <small>
+        Across all restaurants
+       </small>
+       <div class="stat-symbol">
+        &checkmark;
+       </div>
+      </div>
+      <div class="stat-card">
+       <span class="stat-label">
+        RESTAURANTS
+       </span>
+       <b id="mvRestaurants">
+        &mdash;
+       </b>
+       <small>
+        Included in summary
+       </small>
+       <div class="stat-symbol">
+        ⌂
+       </div>
+      </div>
+     </div>
+     <div class="panel chart-panel">
+      <div class="panel-head">
+       <div>
+        <h2>
+         7-day revenue trend
+        </h2>
+        <p>
+         Daily revenue with seven-day moving average &middot; top-ranked restaurants
+        </p>
+       </div>
+       <div class="chart-controls">
+        <label for="analyticsRestaurant">
+         Restaurant
+        </label>
+        <select id="analyticsRestaurant">
+        </select>
+        <span class="chart-legend">
+         <i>
+         </i>
+         Moving average
+        </span>
+       </div>
+      </div>
+      <div class="chart-area" id="movingChart">
+       <div class="loading-cell">
+        Loading analytics&hellip;
+       </div>
+      </div>
+     </div>
+     <div class="panel">
+      <div class="panel-head">
+       <div>
+        <h2>
+         Restaurant leaderboard
+        </h2>
+        <p>
+         DENSE_RANK() over completed-order revenue
+        </p>
+       </div>
+       <span class="table-meta">
+        TOP 20
+       </span>
+      </div>
+      <div class="table-scroll">
+       <table>
+        <thead>
+         <tr>
+          <th>
+           Rank
+          </th>
+          <th>
+           Restaurant
+          </th>
+          <th>
+           Revenue
+          </th>
+          <th>
+           Completed orders
+          </th>
+         </tr>
+        </thead>
+        <tbody id="rankBody">
+         <tr>
+          <td class="loading-cell" colspan="4">
+           Loading rankings&hellip;
+          </td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+      <div class="panel-foot">
+       Last refreshed:
+       <b id="mvRefreshed">
+        Not recorded by the database
+       </b>
+       <span id="refreshStatus">
+       </span>
+      </div>
+     </div>
+    </section>
+    <section class="screen" id="screen-map">
+     <div class="intro-row">
+      <div>
+       <p class="lede">
+        Find the nearest active drivers.
+       </p>
+       <p class="muted">
+        MongoDB $geoNear query &middot; five-kilometre radius &middot; live polling every 10 seconds.
+       </p>
+      </div>
+      <span class="live-poll">
+       <span>
+       </span>
+       Polling every 10s
+      </span>
+     </div>
+     <div class="panel origin-panel">
+      <div class="filter-fields">
+       <label>
+        Origin latitude
+        <input id="originLat" step="0.0001" type="number" value="13.0827"/>
+       </label>
+       <label>
+        Origin longitude
+        <input id="originLon" step="0.0001" type="number" value="80.2707"/>
+       </label>
+       <button class="btn btn-primary" id="mapApply">
+        Update origin
+       </button>
+       <span class="origin-note">
+        Default origin: Chennai &middot; radius 5 km &middot; map refreshes every 10 seconds
+       </span>
+      </div>
+     </div>
+     <div class="map-layout">
+      <div class="panel map-panel">
+       <div class="panel-head">
+        <div>
+         <h2>
+          Driver proximity
+         </h2>
+         <p>
+          Interactive map &middot; click anywhere to choose a new search origin
+         </p>
+        </div>
+        <span class="map-count" id="mapCount">
+         &mdash; nearby
+        </span>
+       </div>
+       <div class="map-canvas" id="mapCanvas" role="application" aria-label="Map showing the selected origin and active drivers within five kilometres">
+        <div class="map-grid"></div>
+        <div class="map-origin"><span>YOU</span></div>
+        <div class="map-placeholder">Waiting for driver pings&hellip;</div>
+       </div>
+       <div class="map-legend">
+        <span>
+         <i class="legend-origin">
+         </i>
+         Origin
+        </span>
+        <span>
+         <i class="legend-driver">
+         </i>
+         Active driver
+        </span>
+        <span>
+         <i class="legend-ring">
+         </i>
+         5 km radius
+        </span>
+       </div>
+      </div>
+      <div class="panel nearby-panel">
+       <div class="panel-head">
+        <div>
+         <h2>
+          Nearest drivers
+         </h2>
+         <p>
+          Sorted by distance
+         </p>
+        </div>
+       </div>
+       <div class="driver-list" id="driverList">
+        <div class="loading-cell">
+         Loading pings&hellip;
+        </div>
+       </div>
+       <div class="panel-foot">
+        Last updated
+        <b id="mapUpdated">
+         &mdash;
+        </b>
+       </div>
+      </div>
+     </div>
+    </section>
+    <section class="screen" id="screen-reviews">
+     <div class="intro-row">
+      <div>
+       <p class="lede">
+        What customers are saying.
+       </p>
+       <p class="muted">
+        MongoDB $facet aggregation: rating distribution, common tags, and average score.
+       </p>
+      </div>
+      <span class="workflow-chip">
+       WORKFLOW 4 &middot; REVIEWS
+      </span>
+     </div>
+     <div class="panel filter-panel">
+      <div class="filter-fields">
+       <label>
+        Restaurant
+        <select id="reviewRestaurant">
+        </select>
+       </label>
+       <button class="btn btn-primary" id="reviewsApply">
+        Load review insights
+       </button>
+       <span class="origin-note">
+        Leave restaurant as &ldquo;All restaurants&rdquo; for the full catalog.
+       </span>
+      </div>
+     </div>
+     <div class="review-summary">
+      <div class="rating-card">
+       <span class="stat-label">
+        OVERALL RATING
+       </span>
+       <div>
+        <b id="avgRating">
+         &mdash;
+        </b>
+        <span class="stars">
+         &starf;&starf;&starf;&starf;&starf;
+        </span>
+       </div>
+       <small id="reviewTotal">
+        Reviews in selection
+       </small>
+      </div>
+      <div class="panel distribution-panel">
+       <div class="panel-head">
+        <div>
+         <h2>
+          Rating distribution
+         </h2>
+         <p>
+          Number of reviews by star rating
+         </p>
+        </div>
+       </div>
+       <div class="bar-chart" id="ratingChart">
+        <div class="loading-cell">
+         Loading&hellip;
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="two-col">
+      <div class="panel">
+       <div class="panel-head">
+        <div>
+         <h2>
+          Top sentiment tags
+         </h2>
+         <p>
+          Most frequent review tags
+         </p>
+        </div>
+       </div>
+       <div class="tag-list" id="tagList">
+        <div class="loading-cell">
+         Loading&hellip;
+        </div>
+       </div>
+      </div>
+      <div class="panel">
+       <div class="panel-head">
+        <div>
+         <h2>
+          Menu catalog
+         </h2>
+         <p>
+          MongoDB flexible document, rendered by category
+         </p>
+        </div>
+       </div>
+       <div class="menu-content" id="menuContent">
+        <div class="loading-cell">
+         Loading menu&hellip;
+        </div>
+       </div>
+      </div>
+     </div>
+    </section>
+    <footer class="footer">
+     <span>
+      BITESTREAM
+      <b>
+       &middot;
+      </b>
+      A1B OPERATIONS CONSOLE
+     </span>
+     <span>
+      PostgreSQL + MongoDB &middot; Built for demo
+     </span>
+    </footer>
+   </main>
+  </div>
+  <div class="toast hidden" id="toast" role="status">
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="./app.js?v=7"></script>
+ </body>
+</html>
+
