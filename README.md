@@ -186,7 +186,14 @@ sudo -u postgres psql -d bitestream -v ON_ERROR_STOP=1 -f sql/09_restore_active_
 ## Submission Information
 
 - **GitHub repository:** :-https://github.com/Ajay-Singh-Jhala/Team17_a1b.git
-- **Final commit hash:** TODO — run `git rev-parse HEAD` and paste the final commit hash.
+- **Final commit hash:** ## Commit Hashes
+
+| Contributor | Work | Commit Hash |
+|---|---|---|
+| dudekulamahammad | Documentation, SQL, README | [16d3b3a](https://github.com/Ajay-Singh-Jhala/Team17_a1b/commit/16d3b3a20c862af64fa7fc32c93797c76663279a) |
+| dudekulamahammad | Seed updates | [150cc00](https://github.com/Ajay-Singh-Jhala/Team17_a1b/commit/150cc005a40d2ba259dae960377ff524ada91337) |
+| Ajay-Singh-Jhala | MongoDB, data generation, API, web | [3e17ef3](https://github.com/Ajay-Singh-Jhala/Team17_a1b/commit/3e17ef35df0e374960cfb7f6ec9a36fb12ed9cb9) |
+
 - **Demo video:**:https://drive.google.com/file/d/192U-3PwXlJ0JdOkp4xgOP_F0NWVKt0Lg/view?usp=drive_link
 
 ## Screenshots
